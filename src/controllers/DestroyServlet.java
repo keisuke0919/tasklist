@@ -1,7 +1,6 @@
 package controllers;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
@@ -12,17 +11,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import models.Task;
 import utils.DBUtil;
+
 /**
- * Servlet implementation class UpdateServlet
+ * Servlet implementation class DestroyServlet
  */
-@WebServlet("/update")
-public class UpdateServlet extends HttpServlet {
+@WebServlet("/destroy")
+public class DestroyServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public UpdateServlet() {
+    public DestroyServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -32,29 +32,20 @@ public class UpdateServlet extends HttpServlet {
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String _token = request.getParameter("_token");
-        if(_token != null && _token.equals(request.getSession().getId())) {
+        if(_token != null && _token.equals(request.getSession().getId())){
             EntityManager em = DBUtil.createEntityManager();
 
             Task t = em.find(Task.class, (Integer)(request.getSession().getAttribute("task_id")));
 
-            String title = request.getParameter("title");
-            t.setTitle(title);
-
-            String content = request.getParameter("content");
-            t.setContent(content);
-
-            Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-            t.setUpdated_at(currentTime);
 
             em.getTransaction().begin();
+            em.remove(t);       // データ削除
             em.getTransaction().commit();
             em.close();
 
             request.getSession().removeAttribute("task_id");
 
             response.sendRedirect(request.getContextPath() + "/index");
-
-
 
 
         }
